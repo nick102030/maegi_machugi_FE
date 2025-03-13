@@ -21,11 +21,14 @@ const QuizGame = () => {
   if (userAnswer.trim().toLowerCase() === correctAnswer.toLowerCase()) {
     if (currentQuestionIndex + 1 < numOfQuestions) {
       setMessage("✅ 정답입니다!");
-      setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
-      setCurrentCharacter(null);
       setTimeout(() => {
-        setCurrentCharacter(guildMembers[currentQuestionIndex + 1]);
-      }, 500);
+        setMessage(""); // ✅ 다음 문제로 넘어가기 전에 정답 메시지 초기화
+        setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
+        setCurrentCharacter(null);
+        setTimeout(() => {
+          setCurrentCharacter(guildMembers[currentQuestionIndex + 1]);
+        }, 500);
+      }, 500); // 1초 후 정답 메시지가 사라지도록 설정
     } else {
       setMessage("🎉 모든 문제를 맞췄습니다! 게임 종료!");
       setTimeout(() => {
@@ -42,7 +45,7 @@ const QuizGame = () => {
   // 엔터 키 입력 감지 함수
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
-      e.preventDefault();
+      e.preventDefault();        
       checkAnswer();
     }
   };
@@ -50,7 +53,7 @@ const QuizGame = () => {
   // 길드 정보 및 문제 개수 입력 후 백엔드 요청
   const fetchGuildMembers = () => {
     if (!guildName || !worldName || numOfQuestions < 1) {
-      alert("길드명, 월드명, 문제 개수를 입력해주세요!");
+      alert("코디만 보고 길드원 맞추기");
       return;
     }
     setLoading(true);
@@ -91,10 +94,9 @@ const QuizGame = () => {
   
   return (
     <div style={styles.container}>
-      {/* 🔹 입력 필드가 보이도록 수정 */}
       {!gameStarted ? (
         <div style={styles.inputBox}>
-          <h1>길드명, 월드명, 문제 개수 입력</h1>
+          <h2>코디만 보고 길드원 맞추기</h2>
           <input
             type="text"
             value={guildName}
@@ -130,7 +132,7 @@ const QuizGame = () => {
         </div>
       ) : (
         <div style={styles.quizBox}>
-          <h1>🎮 길드원 닉네임 맞추기 퀴즈</h1>
+          <h3>맞춰보슈</h3>
           <p>문제 {currentQuestionIndex + 1} / {numOfQuestions}</p>
                     
           {currentCharacter ? (
