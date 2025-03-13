@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const QuizGame = () => {
   const [guildName, setGuildName] = useState("");
@@ -10,6 +10,42 @@ const QuizGame = () => {
   const [message, setMessage] = useState("");
   const [gameStarted, setGameStarted] = useState(false);
   const [loading, setLoading] = useState(false); // ✅ 로딩 상태 추가
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0); // ✅ 현재 문제 인덱스 상태 추가
+
+  const checkAnswer = () => {
+  if (!currentCharacter) return;
+  setMessage(""); // ✅ 정답을 입력할 때마다 메시지 초기화
+  // ✅ 현재 문제의 정답을 정확히 비교
+  const correctAnswer = guildMembers[currentQuestionIndex]?.characterName || "";
+  
+  if (userAnswer.trim().toLowerCase() === correctAnswer.toLowerCase()) {
+    if (currentQuestionIndex + 1 < numOfQuestions) {
+      setMessage("✅ 정답입니다!");
+      setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
+      setCurrentCharacter(null);
+      setTimeout(() => {
+        setCurrentCharacter(guildMembers[currentQuestionIndex + 1]);
+      }, 500);
+    } else {
+      setMessage("🎉 모든 문제를 맞췄습니다! 게임 종료!");
+      setTimeout(() => {
+        setGameStarted(false);
+      }, 3000);
+    }
+  } else {
+    setMessage(`❌ 틀렸습니다! 정답: ${correctAnswer}`);
+  }
+  
+  setUserAnswer("");
+  };
+  
+  // 엔터 키 입력 감지 함수
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      checkAnswer();
+    }
+  };
 
   // 길드 정보 및 문제 개수 입력 후 백엔드 요청
   const fetchGuildMembers = () => {
@@ -18,7 +54,13 @@ const QuizGame = () => {
       return;
     }
     setLoading(true);
-
+  
+    // 게임 시작 시 상태 초기화
+    setCurrentQuestionIndex(0);
+    setGuildMembers([]);
+    setCurrentCharacter(null);
+    setMessage("");
+    
     const url = `http://localhost:8080/api/v1/guild/game?guild_name=${guildName}&world_name=${worldName}&numOfCharacter=${numOfQuestions}`;
     
     fetch(url, {
@@ -38,6 +80,15 @@ const QuizGame = () => {
       .finally(() => setLoading(false));
   };
 
+  // ✅ useEffect를 사용하여 currentCharacter 업데이트
+  useEffect(() => {
+    if (currentQuestionIndex < guildMembers.length) {
+      setTimeout(() => {
+        setCurrentCharacter(guildMembers[currentQuestionIndex]);
+      }, 500);
+    }
+  }, [currentQuestionIndex, guildMembers]);
+  
   return (
     <div style={styles.container}>
       {/* 🔹 입력 필드가 보이도록 수정 */}
@@ -64,9 +115,9 @@ const QuizGame = () => {
             onChange={(e) => {
               const value = e.target.value;
               if (value === "") {
-                setNumOfQuestions(""); // 🔹 사용자가 지웠을 때 빈 값 유지
+                setNumOfQuestions("");
               } else {
-                setNumOfQuestions(Number(value)); // 🔹 01 → 1, 02 → 2 자동 변환
+                setNumOfQuestions(Number(value));
               }
             }}
             placeholder="문제 개수 입력"
@@ -74,32 +125,38 @@ const QuizGame = () => {
             style={styles.input}
           />
           <button onClick={fetchGuildMembers} style={styles.button} disabled={loading}>
-            {loading ? "로딩 중..." : "게임 시작"} {/* ✅ 버튼 내 로딩 표시 */}
+            {loading ? "로딩 중..." : "게임 시작"}
           </button>
         </div>
       ) : (
         <div style={styles.quizBox}>
           <h1>🎮 길드원 닉네임 맞추기 퀴즈</h1>
-          <p>문제 {guildMembers.length > 0 ? `1 / ${numOfQuestions}` : "로딩 중..."}</p>
-          {currentCharacter && (
-            <>
-              <img 
-                src={currentCharacter?.imageURL} 
-                alt="캐릭터" 
-                style={styles.characterImage} 
-                onError={(e) => e.target.src = "/fallback.png"} 
-              />
-              <input
-                type="text"
-                value={userAnswer}
-                onChange={(e) => setUserAnswer(e.target.value)}
-                placeholder="닉네임 입력"
-                style={styles.input}
-              />
-              <button onClick={() => setMessage("정답 확인 기능 구현 필요")} style={styles.button}>정답 제출</button>
-              <p style={styles.message}>{message}</p>
-            </>
+          <p>문제 {currentQuestionIndex + 1} / {numOfQuestions}</p>
+                    
+          {currentCharacter ? (
+            <img 
+              src={currentCharacter?.imageURL} 
+              alt="캐릭터" 
+              style={styles.characterImage} 
+              onError={(e) => e.target.src = "/fallback.png"} 
+            />
+          ) : (
+            <p>다음 문제 준비 중...</p>
           )}
+
+          <input
+            type="text"
+            value={userAnswer}
+            onChange={(e) => setUserAnswer(e.target.value)}
+            placeholder="닉네임 입력"
+            style={styles.input}
+            onKeyPress={handleKeyDown}
+            disabled={!currentCharacter}
+          />
+          <button onClick={checkAnswer} style={styles.button} disabled={!currentCharacter}>
+            정답 제출
+          </button>
+          <p style={styles.message}>{message}</p>
         </div>
       )}
     </div>
