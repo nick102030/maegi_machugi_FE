@@ -9,6 +9,7 @@ const QuizGame = () => {
   const [userAnswer, setUserAnswer] = useState("");
   const [message, setMessage] = useState("");
   const [gameStarted, setGameStarted] = useState(false);
+  const [loading, setLoading] = useState(false); // ✅ 로딩 상태 추가
 
   // 길드 정보 및 문제 개수 입력 후 백엔드 요청
   const fetchGuildMembers = () => {
@@ -16,6 +17,7 @@ const QuizGame = () => {
       alert("길드명, 월드명, 문제 개수를 입력해주세요!");
       return;
     }
+    setLoading(true);
 
     const url = `http://localhost:8080/api/v1/guild/game?guild_name=${guildName}&world_name=${worldName}&numOfCharacter=${numOfQuestions}`;
     
@@ -32,7 +34,8 @@ const QuizGame = () => {
           setGameStarted(true);
         }
       })
-      .catch((error) => console.error("Error fetching data:", error));
+      .catch((error) => console.error("Error fetching data:", error))
+      .finally(() => setLoading(false));
   };
 
   return (
@@ -70,7 +73,9 @@ const QuizGame = () => {
             min="1"
             style={styles.input}
           />
-          <button onClick={fetchGuildMembers} style={styles.button}>게임 시작</button>
+          <button onClick={fetchGuildMembers} style={styles.button} disabled={loading}>
+            {loading ? "로딩 중..." : "게임 시작"} {/* ✅ 버튼 내 로딩 표시 */}
+          </button>
         </div>
       ) : (
         <div style={styles.quizBox}>
