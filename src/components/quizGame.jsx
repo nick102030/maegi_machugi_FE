@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const QuizGame = () => {
   const [guildName, setGuildName] = useState("");
@@ -70,8 +72,14 @@ const QuizGame = () => {
       method: "GET",
       headers: { "Content-Type": "application/json" }
     })
-      .then((res) => res.json())
-      .then((data) => {
+    .then(async (res) => {
+      const data = await res.json();
+
+      if (!res.ok) {
+        const errorMsg = data.message || "알 수 없는 오류 발생";
+        throw new Error(errorMsg);
+      }
+
         console.log("🔍 서버 응답 데이터:", data);
         setGuildMembers(data);
         if (data.length > 0) {
@@ -79,7 +87,10 @@ const QuizGame = () => {
           setGameStarted(true);
         }
       })
-      .catch((error) => console.error("Error fetching data:", error))
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+        toast.error(`❗ ${error.message}`);
+      })
       .finally(() => setLoading(false));
   };
 
@@ -94,6 +105,7 @@ const QuizGame = () => {
   
   return (
     <div style={styles.container}>
+      <ToastContainer />
       {!gameStarted ? (
         <div style={styles.inputBox}>
           <h2>코디만 보고 길드원 맞추기</h2>
