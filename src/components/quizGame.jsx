@@ -38,7 +38,7 @@ const QuizGame = () => {
           }, 500);
         }, 500); // 1초 후 정답 메시지가 사라지도록 설정
       } else {
-        setMessage(`🎉 게임 종료! 총 ${numOfQuestions}문제 중 ${correctCount + 1}문제 맞췄습니다!`); // ✅ 정답 개수 포함
+        setMessage(`🎉 게임 종료! 총 ${numOfQuestions}문제 중 ${correctCount}문제 맞췄습니다!`); // ✅ 정답 개수 포함
         setTimeout(() => {
           setGameStarted(false);
         }, 3000);
@@ -51,7 +51,7 @@ const QuizGame = () => {
           setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
           setCurrentCharacter(null);
         } else {
-          setMessage(`🎉 게임 종료! 총 ${numOfQuestions}문제 중 ${correctCount + 1}문제 맞췄습니다!`); // ✅ 정답 개수 포함
+          setMessage(`🎉 게임 종료! 총 ${numOfQuestions}문제 중 ${correctCount}문제 맞췄습니다!`); // ✅ 정답 개수 포함
           setTimeout(() => {
             setGameStarted(false);
           }, 3000);
