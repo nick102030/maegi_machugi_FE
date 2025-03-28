@@ -13,35 +13,53 @@ const QuizGame = () => {
   const [gameStarted, setGameStarted] = useState(false);
   const [loading, setLoading] = useState(false); // ✅ 로딩 상태 추가
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0); // ✅ 현재 문제 인덱스 상태 추가
+  const [correctCount, setCorrectCount] = useState(0); // ✅ 정답 개수 상태 추가
 
   const checkAnswer = () => {
-  if (!currentCharacter) return;
-  setMessage(""); // ✅ 정답을 입력할 때마다 메시지 초기화
-  // ✅ 현재 문제의 정답을 정확히 비교
-  const correctAnswer = guildMembers[currentQuestionIndex]?.characterName || "";
-  
-  if (userAnswer.trim().toLowerCase() === correctAnswer.toLowerCase()) {
-    if (currentQuestionIndex + 1 < numOfQuestions) {
-      setMessage("✅ 정답입니다!");
-      setTimeout(() => {
-        setMessage(""); // ✅ 다음 문제로 넘어가기 전에 정답 메시지 초기화
-        setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
-        setCurrentCharacter(null);
-        setTimeout(() => {
-          setCurrentCharacter(guildMembers[currentQuestionIndex + 1]);
-        }, 500);
-      }, 500); // 1초 후 정답 메시지가 사라지도록 설정
-    } else {
-      setMessage("🎉 모든 문제를 맞췄습니다! 게임 종료!");
-      setTimeout(() => {
-        setGameStarted(false);
-      }, 3000);
+    if (!currentCharacter) return;
+    if (!userAnswer.trim()) {
+      setMessage("❗ 정답을 입력해주세요!");
+      return;
     }
-  } else {
-    setMessage(`❌ 틀렸습니다! 정답: ${correctAnswer}`);
-  }
-  
-  setUserAnswer("");
+    setMessage(""); // ✅ 정답을 입력할 때마다 메시지 초기화
+    // ✅ 현재 문제의 정답을 정확히 비교
+    const correctAnswer = guildMembers[currentQuestionIndex]?.characterName || "";
+    
+    if (userAnswer.trim().toLowerCase() === correctAnswer.toLowerCase()) {
+      setCorrectCount(prev => prev + 1); // ✅ 정답 개수 증가
+      if (currentQuestionIndex + 1 < numOfQuestions) {
+        setMessage("✅ 정답입니다!");
+        setTimeout(() => {
+          setMessage(""); // ✅ 다음 문제로 넘어가기 전에 정답 메시지 초기화
+          setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
+          setCurrentCharacter(null);
+          setTimeout(() => {
+            setCurrentCharacter(guildMembers[currentQuestionIndex + 1]);
+          }, 500);
+        }, 500); // 1초 후 정답 메시지가 사라지도록 설정
+      } else {
+        setMessage(`🎉 게임 종료! 총 ${numOfQuestions}문제 중 ${correctCount + 1}문제 맞췄습니다!`); // ✅ 정답 개수 포함
+        setTimeout(() => {
+          setGameStarted(false);
+        }, 3000);
+      } // 1초 후 정답 메시지가 사라지도록 설정
+    } else {
+      setMessage(`❌ 틀렸습니다! 정답: ${correctAnswer}`);
+      setTimeout(() => {
+        setMessage("");
+        if (currentQuestionIndex + 1 < numOfQuestions) {
+          setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
+          setCurrentCharacter(null);
+        } else {
+          setMessage(`🎉 게임 종료! 총 ${numOfQuestions}문제 중 ${correctCount + 1}문제 맞췄습니다!`); // ✅ 정답 개수 포함
+          setTimeout(() => {
+            setGameStarted(false);
+          }, 3000);
+        }
+      }, 1500);
+    }
+      
+    setUserAnswer("");
   };
   
   // 엔터 키 입력 감지 함수
@@ -65,6 +83,7 @@ const QuizGame = () => {
     setGuildMembers([]);
     setCurrentCharacter(null);
     setMessage("");
+    setCorrectCount(0); // ✅ 정답 개수 초기화
     
     const url = `http://localhost:8080/api/v1/guild/game?guild_name=${guildName}&world_name=${worldName}&numOfCharacter=${numOfQuestions}`;
     
