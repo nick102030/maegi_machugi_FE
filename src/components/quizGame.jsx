@@ -36,9 +36,16 @@ const QuizGame = () => {
           setTimeout(() => {
             setCurrentCharacter(guildMembers[currentQuestionIndex + 1]);
           }, 500);
-        }, 500); // 1초 후 정답 메시지가 사라지도록 설정
+        }, 1000); // 1초 후 정답 메시지가 사라지도록 설정
       } else {
-        setMessage(`🎉 게임 종료! 총 ${numOfQuestions}문제 중 ${correctCount}문제 맞췄습니다!`); // ✅ 정답 개수 포함
+        setMessage("✅ 정답입니다!");
+        setTimeout(() => {
+          setMessage("");
+          setMessage(`🎉 게임 종료! 총 ${numOfQuestions}문제 중 ${correctCount + 1}문제 맞췄습니다!`);
+          setTimeout(() => {
+            setGameStarted(false);
+          }, 3000);
+        }, 1500)
         setTimeout(() => {
           setGameStarted(false);
         }, 3000);
