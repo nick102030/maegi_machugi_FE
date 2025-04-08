@@ -106,7 +106,7 @@ const QuizGame = () => {
         throw new Error(errorMsg);
       }
 
-        console.log("🔍 서버 응답 데이터:", data);
+        //console.log("🔍 서버 응답 데이터:", data);
         setGuildMembers(data);
         if (data.length > 0) {
           setCurrentCharacter(data[Math.floor(Math.random() * data.length)]);
