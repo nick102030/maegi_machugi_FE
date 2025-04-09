@@ -92,7 +92,7 @@ const QuizGame = () => {
     setMessage("");
     setCorrectCount(0); // ✅ 정답 개수 초기화
     
-    const url = `http://localhost:8080/api/v1/guild/game?guild_name=${guildName}&world_name=${worldName}&numOfCharacter=${numOfQuestions}`;
+    const url = `api/v1/guild/game?guild_name=${guildName}&world_name=${worldName}&numOfCharacter=${numOfQuestions}`;
     
     fetch(url, {
       method: "GET",
