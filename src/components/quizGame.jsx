@@ -134,7 +134,7 @@ const QuizGame = () => {
       <ToastContainer />
       {!gameStarted ? (
         <div style={styles.inputBox}>
-          <h2>코디만 보고 길드원 맞추기</h2>
+          <h2>코디 보고 길드원 맞추기</h2>
           <input
             type="text"
             value={guildName}
